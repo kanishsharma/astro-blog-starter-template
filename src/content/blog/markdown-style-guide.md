@@ -3,6 +3,9 @@ title: "Markdown Style Guide"
 description: "Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro."
 pubDate: "Jun 19 2024"
 heroImage: "/blog-placeholder-1.jpg"
+category: "Health & Self-Care"
+dek: "A reference note for shaping longform writing with rhythm, hierarchy, and care."
+theme: "gold"
 ---
 
 Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro.

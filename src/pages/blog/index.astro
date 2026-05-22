@@ -9,6 +9,8 @@ import FormattedDate from '../../components/FormattedDate.astro';
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const featuredPosts = posts.filter((post) => post.data.featured);
+const years = [...new Set(posts.map((post) => post.data.pubDate.getFullYear()))];
 ---
 
 <!doctype html>
@@ -16,71 +18,140 @@ const posts = (await getCollection('blog')).sort(
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
+			.archive-intro {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.4fr);
 				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
+				align-items: end;
+				padding-bottom: 2.5rem;
+				border-bottom: 1px solid var(--border);
 			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
+
+			.archive-intro h1 {
 				margin-bottom: 1rem;
-				text-align: center;
+				font-size: clamp(4rem, 12vw, 9rem);
+				letter-spacing: -0.085em;
 			}
-			ul li:first-child img {
-				width: 100%;
+
+			.archive-intro p {
+				color: var(--muted);
+				font-size: clamp(1.08rem, 2vw, 1.35rem);
+				line-height: 1.4;
 			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
+
+			.archive-count {
+				padding: 1rem;
+				border: 1px solid var(--border);
+				border-radius: 1rem;
+				background: var(--surface);
+				color: var(--text-soft);
+				font-family: var(--font-sans);
+				font-size: 0.78rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
 			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
+
+			.featured-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 1rem;
+				margin-top: 2rem;
 			}
-			ul li a {
+
+			.feature-card,
+			.post-row {
 				display: block;
+				color: var(--text);
+				text-decoration: none;
 			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
+
+			.feature-card {
+				padding: 1rem;
+				border: 1px solid var(--border);
+				border-radius: 1.25rem;
+				background: rgba(255, 255, 255, 0.03);
 			}
+
+			.feature-art {
+				min-height: 18rem;
+				margin-bottom: 1rem;
+				border: 1px solid var(--border);
+				border-radius: 1rem;
+				background-position: center;
+				background-size: cover;
+				box-shadow: var(--shadow);
+			}
+
+			.archive-section {
+				margin-top: 3.5rem;
+			}
+
+			.year-heading {
+				position: sticky;
+				top: 0;
+				margin-bottom: 0.8rem;
+				padding: 0.8rem 0;
+				border-bottom: 1px solid var(--border);
+				background: rgba(var(--bg-rgb), 0.82);
+				backdrop-filter: blur(14px);
+				font-family: var(--font-sans);
+				font-size: 0.78rem;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+			}
+
+			.post-row {
+				display: grid;
+				grid-template-columns: 9rem minmax(0, 1fr) minmax(12rem, 0.36fr);
+				gap: 1.25rem;
+				align-items: baseline;
+				padding: 1.15rem 0;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.kicker,
 			.date {
-				margin: 0;
-				color: rgb(var(--gray));
+				color: var(--muted);
+				font-family: var(--font-sans);
+				font-size: 0.78rem;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
 			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
+
+			.feature-card h2,
+			.post-row h2 {
+				margin: 0.45rem 0;
+				letter-spacing: -0.045em;
 			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
+
+			.feature-card h2 {
+				font-size: clamp(2rem, 4vw, 3.4rem);
 			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
+
+			.post-row h2 {
+				font-size: clamp(1.45rem, 3vw, 2.6rem);
+			}
+
+			.summary {
+				color: var(--muted);
+				font-size: 0.94rem;
+			}
+
+			@media (max-width: 900px) {
+				.archive-intro,
+				.featured-grid {
+					grid-template-columns: 1fr;
 				}
-				ul li {
-					width: 100%;
-					text-align: center;
+
+				.post-row {
+					grid-template-columns: 1fr;
+					gap: 0.35rem;
 				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
+			}
+
+			@media (max-width: 560px) {
+				.feature-art {
+					min-height: 14rem;
 				}
 			}
 		</style>
@@ -88,22 +159,54 @@ const posts = (await getCollection('blog')).sort(
 	<body>
 		<Header />
 		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									<img width={720} height={360} src={post.data.heroImage} alt="" />
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
+			<section class="archive-intro" aria-labelledby="archive-title">
+				<div>
+					<h1 id="archive-title">Writing</h1>
+					<p>Every essay, note, guide, and postcard from the archive, gathered in one place.</p>
+				</div>
+				<div class="archive-count">{posts.length} pieces in the archive</div>
+			</section>
+
+			{
+				featuredPosts.length > 0 && (
+					<section class="featured-grid" aria-label="Featured posts">
+						{featuredPosts.map((post) => (
+							<a class="feature-card" href={`/blog/${post.id}/`}>
+								<div
+									class="feature-art"
+									style={`background-image: linear-gradient(135deg, rgba(var(--bg-rgb), 14%), rgba(214, 179, 109, 20%)), url("${post.data.heroImage ?? ''}");`}
+								></div>
+								<div class="kicker">{post.data.category ?? 'Featured'}</div>
+								<h2>{post.data.title}</h2>
+								<p class="summary">{post.data.dek ?? post.data.description}</p>
+							</a>
+						))}
+					</section>
+				)
+			}
+
+			<section aria-label="All blog posts">
+				{
+					years.map((year) => (
+						<div class="archive-section">
+							<h2 class="year-heading">{year}</h2>
+							{posts
+								.filter((post) => post.data.pubDate.getFullYear() === year)
+								.map((post) => (
+									<a class="post-row" href={`/blog/${post.id}/`}>
+										<div class="date">
+											<FormattedDate date={post.data.pubDate} />
+										</div>
+										<div>
+											<div class="kicker">{post.data.category ?? 'Essay'}</div>
+											<h2>{post.data.title}</h2>
+										</div>
+										<p class="summary">{post.data.dek ?? post.data.description}</p>
+									</a>
+								))}
+						</div>
+					))
+				}
 			</section>
 		</main>
 		<Footer />

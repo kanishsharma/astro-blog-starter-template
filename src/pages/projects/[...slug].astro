@@ -1,0 +1,30 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import WorkDetail from '../../layouts/WorkDetail.astro';
+
+export async function getStaticPaths() {
+	const projects = await getCollection('projects');
+	return projects.map((project) => ({
+		params: { slug: project.id },
+		props: project,
+	}));
+}
+
+type Props = CollectionEntry<'projects'>;
+
+const project = Astro.props;
+const { Content } = await render(project);
+const links = [
+	project.data.url && { label: 'Visit project', url: project.data.url },
+	project.data.sourceUrl && { label: 'Source', url: project.data.sourceUrl },
+].filter((link): link is { label: string; url: string } => Boolean(link));
+---
+
+<WorkDetail
+	title={`${project.data.title} | Project`}
+	description={project.data.description}
+	kicker={project.data.status ?? 'Project'}
+	links={links}
+>
+	<Content />
+</WorkDetail>

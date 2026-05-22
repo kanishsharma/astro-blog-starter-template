@@ -1,0 +1,171 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+import { getCollection } from 'astro:content';
+
+const entries = (await getCollection('til')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead
+			title={`TIL | ${SITE_TITLE}`}
+			description="Small notes, discoveries, and today-I-learned entries."
+		/>
+		<style>
+			main {
+				width: min(58rem, calc(100% - 2rem));
+				margin: 0 auto;
+			}
+
+			.til-header {
+				margin-bottom: 2.75rem;
+			}
+
+			.til-header h1 {
+				margin-bottom: 0.65rem;
+				font-size: clamp(3rem, 8vw, 5.2rem);
+				font-weight: 700;
+				letter-spacing: -0.07em;
+			}
+
+			.til-header p {
+				max-width: 36rem;
+				color: var(--muted);
+				font-size: 1.08rem;
+			}
+
+			.til-list {
+				display: grid;
+				gap: 2.4rem;
+				padding-bottom: 5rem;
+			}
+
+			.til-row {
+				display: grid;
+				grid-template-columns: 8.5rem minmax(0, 1fr);
+				gap: 1.6rem;
+				align-items: start;
+			}
+
+			.til-date {
+				color: var(--muted);
+				font-family: var(--font-sans);
+				font-size: 0.92rem;
+				line-height: 1.4;
+			}
+
+			.likes {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				margin-top: 0.6rem;
+				padding: 0.22rem 0.6rem;
+				border-radius: 999px;
+				background: var(--surface);
+				color: var(--muted);
+				font-family: var(--font-sans);
+				font-size: 0.78rem;
+			}
+
+			.likes svg {
+				width: 0.85rem;
+				height: 0.85rem;
+				fill: currentColor;
+			}
+
+			.til-content h2 {
+				margin-bottom: 0.55rem;
+				font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+				font-weight: 600;
+				letter-spacing: -0.04em;
+			}
+
+			.til-content h2 a {
+				color: var(--text);
+				text-decoration: none;
+			}
+
+			.til-content h2 a:hover {
+				color: var(--accent);
+			}
+
+			.til-content p {
+				max-width: 40rem;
+				margin-bottom: 0.55rem;
+				color: var(--text-soft);
+				font-size: 1rem;
+				line-height: 1.55;
+			}
+
+			.read-more {
+				color: var(--text-soft);
+				font-family: var(--font-sans);
+				font-size: 0.88rem;
+			}
+
+			.empty-state {
+				padding: 2rem;
+				border: 1px solid var(--border);
+				border-radius: 1rem;
+				background: var(--surface);
+				color: var(--muted);
+			}
+
+			@media (max-width: 680px) {
+				.til-row {
+					grid-template-columns: 1fr;
+					gap: 0.7rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="til-header" aria-labelledby="til-title">
+				<h1 id="til-title">TIL</h1>
+				<p>Small things learned, noticed, or worth remembering.</p>
+			</section>
+			<section class="til-list" aria-label="Today I learned entries">
+				{
+					entries.length === 0 ? (
+						<p class="empty-state">No TIL entries yet.</p>
+					) : (
+						entries.map((entry) => (
+							<article class="til-row">
+								<div class="til-date">
+									<FormattedDate date={entry.data.pubDate} />
+									{
+										entry.data.likes !== undefined && (
+											<div class="likes" aria-label={`${entry.data.likes} likes`}>
+												<svg viewBox="0 0 24 24" aria-hidden="true">
+													<path d="M12 21s-7.2-4.4-9.6-8.8C.3 8.3 2.7 4 6.9 4c2 0 3.7 1 5.1 2.8C13.4 5 15.1 4 17.1 4c4.2 0 6.6 4.3 4.5 8.2C19.2 16.6 12 21 12 21z" />
+												</svg>
+												{entry.data.likes}
+											</div>
+										)
+									}
+								</div>
+								<div class="til-content">
+									<h2>
+										<a href={`/til/${entry.id}/`}>{entry.data.title}</a>
+									</h2>
+									<p>{entry.data.description}</p>
+									<a class="read-more" href={`/til/${entry.id}/`}>Learn more</a>
+								</div>
+							</article>
+						))
+					)
+				}
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

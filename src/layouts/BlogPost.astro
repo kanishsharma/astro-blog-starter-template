@@ -7,49 +7,139 @@ import FormattedDate from '../components/FormattedDate.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const {
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	heroImage,
+	category,
+	dek,
+	subtitle,
+	accentColor,
+	theme,
+} = Astro.props;
+const displayDescription = dek ?? subtitle ?? description;
 ---
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description} image={heroImage} />
 		<style>
 			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
+				width: min(72rem, calc(100% - 2rem));
+				margin: 0 auto;
 			}
+
+			article {
+				--post-accent: var(--accent);
+			}
+
+			article[data-theme="moss"] {
+				--post-accent: var(--accent-2);
+			}
+
+			article[data-theme="violet"] {
+				--post-accent: #b7a6ff;
+			}
+
+			article[data-theme="blue"] {
+				--post-accent: #9fc6ff;
+			}
+
+			article[data-theme="ember"] {
+				--post-accent: #e39b77;
+			}
+
 			.hero-image {
 				width: 100%;
+				min-height: clamp(18rem, 44vw, 34rem);
+				display: flex;
+				align-items: flex-end;
+				justify-content: flex-start;
+				padding: clamp(1.5rem, 5vw, 3rem);
+				border: 1px solid var(--border);
+				border-radius: 1.5rem;
+				background-color: var(--surface);
+				background-position: center;
+				background-size: cover;
+				box-shadow: var(--shadow);
 			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
+
+			.hero-image span {
+				max-width: 9ch;
+				color: var(--text);
+				font-size: clamp(3.5rem, 10vw, 8.4rem);
+				letter-spacing: -0.085em;
+				line-height: 0.82;
 			}
+
 			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
+				width: min(44rem, 100%);
+				margin: 0 auto;
+				color: var(--text-soft);
+				font-size: 1.08rem;
 			}
+
 			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
+				width: min(44rem, 100%);
+				margin: 0 auto 2.5rem;
+				padding: 2.8rem 0 1.8rem;
+				border-bottom: 1px solid var(--border);
 			}
+
 			.title h1 {
-				margin: 0 0 0.5em 0;
+				margin: 0 0 1rem;
+				font-size: clamp(2.8rem, 7vw, 5.8rem);
+				letter-spacing: -0.075em;
 			}
+
+			.category {
+				margin-bottom: 0.8rem;
+				color: var(--post-accent);
+				font-family: var(--font-sans);
+				font-size: 0.76rem;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+			}
+
+			.description {
+				margin: 0 0 1.25rem;
+				color: var(--text-soft);
+				font-size: clamp(1.12rem, 2vw, 1.4rem);
+				line-height: 1.4;
+			}
+
 			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
+				margin-bottom: 1rem;
+				color: var(--muted);
+				font-family: var(--font-sans);
+				font-size: 0.78rem;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
 			}
+
 			.last-updated-on {
+				margin-top: 0.3rem;
+				letter-spacing: 0;
+				text-transform: none;
 				font-style: italic;
+			}
+
+			.prose :global(h2),
+			.prose :global(h3) {
+				color: var(--text);
+				letter-spacing: -0.04em;
+			}
+
+			.prose :global(a) {
+				color: var(--post-accent);
+			}
+
+			.prose :global(img) {
+				margin: 1rem 0 2rem;
+				border: 1px solid var(--border);
+				border-radius: 1rem;
 			}
 		</style>
 	</head>
@@ -57,25 +147,29 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 	<body>
 		<Header />
 		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <img width={1020} height={510} src={heroImage} alt="" />}
+			<article data-theme={theme} style={accentColor ? `--post-accent: ${accentColor};` : undefined}>
+				<div
+					class="hero-image"
+					style={`background-image: linear-gradient(135deg, rgba(var(--bg-rgb), 18%), rgba(214, 179, 109, 18%)), url("${heroImage ?? ''}");`}
+				>
+					<span>{title}</span>
+				</div>
+				<div class="title">
+					{category && <div class="category">{category}</div>}
+					<div class="date">
+						<FormattedDate date={pubDate} />
+						{
+							updatedDate && (
+								<div class="last-updated-on">
+									Last updated on <FormattedDate date={updatedDate} />
+								</div>
+							)
+						}
+					</div>
+					<h1>{title}</h1>
+					<p class="description">{displayDescription}</p>
 				</div>
 				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
-					</div>
 					<slot />
 				</div>
 			</article>
