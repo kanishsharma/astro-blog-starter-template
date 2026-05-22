@@ -3,23 +3,17 @@ import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
 const {
 	title,
 	description,
-	pubDate,
-	updatedDate,
 	heroImage,
 	category,
-	dek,
-	subtitle,
 	accentColor,
 	theme,
 } = Astro.props;
-const displayDescription = dek ?? subtitle ?? description;
 ---
 
 <html lang="en">
@@ -51,29 +45,6 @@ const displayDescription = dek ?? subtitle ?? description;
 				--post-accent: #e39b77;
 			}
 
-			.hero-image {
-				width: 100%;
-				min-height: clamp(18rem, 44vw, 34rem);
-				display: flex;
-				align-items: flex-end;
-				justify-content: flex-start;
-				padding: clamp(1.5rem, 5vw, 3rem);
-				border: 1px solid var(--border);
-				border-radius: 1.5rem;
-				background-color: var(--surface);
-				background-position: center;
-				background-size: cover;
-				box-shadow: var(--shadow);
-			}
-
-			.hero-image span {
-				max-width: 9ch;
-				color: var(--text);
-				font-size: clamp(3.5rem, 10vw, 8.4rem);
-				letter-spacing: -0.085em;
-				line-height: 0.82;
-			}
-
 			.prose {
 				width: min(44rem, 100%);
 				margin: 0 auto;
@@ -84,7 +55,7 @@ const displayDescription = dek ?? subtitle ?? description;
 			.title {
 				width: min(44rem, 100%);
 				margin: 0 auto 2.5rem;
-				padding: 2.8rem 0 1.8rem;
+				padding: clamp(3rem, 8vw, 6rem) 0 1.8rem;
 				border-bottom: 1px solid var(--border);
 			}
 
@@ -101,29 +72,6 @@ const displayDescription = dek ?? subtitle ?? description;
 				font-size: 0.76rem;
 				letter-spacing: 0.2em;
 				text-transform: uppercase;
-			}
-
-			.description {
-				margin: 0 0 1.25rem;
-				color: var(--text-soft);
-				font-size: clamp(1.12rem, 2vw, 1.4rem);
-				line-height: 1.4;
-			}
-
-			.date {
-				margin-bottom: 1rem;
-				color: var(--muted);
-				font-family: var(--font-sans);
-				font-size: 0.78rem;
-				letter-spacing: 0.14em;
-				text-transform: uppercase;
-			}
-
-			.last-updated-on {
-				margin-top: 0.3rem;
-				letter-spacing: 0;
-				text-transform: none;
-				font-style: italic;
 			}
 
 			.prose :global(h2),
@@ -148,26 +96,9 @@ const displayDescription = dek ?? subtitle ?? description;
 		<Header />
 		<main>
 			<article data-theme={theme} style={accentColor ? `--post-accent: ${accentColor};` : undefined}>
-				<div
-					class="hero-image"
-					style={`background-image: linear-gradient(135deg, rgba(var(--bg-rgb), 18%), rgba(214, 179, 109, 18%)), url("${heroImage ?? ''}");`}
-				>
-					<span>{title}</span>
-				</div>
 				<div class="title">
 					{category && <div class="category">{category}</div>}
-					<div class="date">
-						<FormattedDate date={pubDate} />
-						{
-							updatedDate && (
-								<div class="last-updated-on">
-									Last updated on <FormattedDate date={updatedDate} />
-								</div>
-							)
-						}
-					</div>
 					<h1>{title}</h1>
-					<p class="description">{displayDescription}</p>
 				</div>
 				<div class="prose">
 					<slot />
